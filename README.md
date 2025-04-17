@@ -1,5 +1,6 @@
-# Firebase Studio
+# Photo Poet
 
-This is a NextJS starter in Firebase Studio.
+Framework: NextJS
+Platform: Firebase Studio
 
-To get started, take a look at src/app/page.tsx.
+Begin with src/app/page.tsx.
