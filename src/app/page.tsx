@@ -7,11 +7,23 @@ import {Input} from '@/components/ui/input';
 import {Textarea} from '@/components/ui/textarea';
 import {generatePoem} from '@/ai/flows/generate-poem';
 import {useToast} from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 export default function Home() {
   const [photoUrl, setPhotoUrl] = useState('');
   const [poem, setPoem] = useState('');
   const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false); // State for the AlertDialog
   const {toast} = useToast();
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -56,6 +68,33 @@ export default function Home() {
       });
       return;
     }
+    setOpen(true);
+  };
+
+  const handleCopyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(poem);
+      toast({
+        title: 'Poem copied to clipboard!',
+      });
+      setOpen(false); // Close the AlertDialog after copying
+    } catch (error: any) {
+      console.error('Error copying poem to clipboard:', error);
+      toast({
+        title: 'Copying failed!',
+        description: error.message || 'Could not copy the poem.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleShareToApps = async () => {
+    if (!poem) {
+      toast({
+        title: 'No poem to share!',
+      });
+      return;
+    }
 
     try {
       await navigator.share({
@@ -66,6 +105,7 @@ export default function Home() {
       toast({
         title: 'Shared successfully!',
       });
+      setOpen(false);
     } catch (error: any) {
       console.error('Error sharing poem:', error);
       toast({
@@ -111,6 +151,22 @@ export default function Home() {
           )}
         </CardContent>
       </Card>
+
+      <AlertDialog open={open} onOpenChange={setOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Share Your Poem</AlertDialogTitle>
+            <AlertDialogDescription>
+              Choose how you want to share your poem.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setOpen(false)}>Cancel</AlertDialogCancel>
+            <Button onClick={handleCopyToClipboard}>Copy to Clipboard</Button>
+            <AlertDialogAction onClick={handleShareToApps}>Share to Apps</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
